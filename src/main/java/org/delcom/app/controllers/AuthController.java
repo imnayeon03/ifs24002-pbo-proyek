@@ -1,6 +1,4 @@
-package org.delcom.app.views;
-
-import java.util.List;
+package org.delcom.app.controllers; // UBAH PACKAGE KE CONTROLLERS
 
 import org.delcom.app.dto.LoginForm;
 import org.delcom.app.dto.RegisterForm;
@@ -30,19 +28,24 @@ import jakarta.validation.Valid;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 
+import java.util.List; // Jangan lupa import List
+
 @Controller
 @RequestMapping("/auth")
-public class AuthView {
+public class AuthController { // UBAH NAMA CLASS
 
     private final UserService userService;
 
-    public AuthView(UserService userService, AuthTokenService authTokenService) {
+    // Hapus AuthTokenService jika tidak dipakai di method (di kode sebelumnya tidak terpakai)
+    public AuthController(UserService userService) { 
         this.userService = userService;
     }
 
+    // ... (Sisa kodenya sama persis, hanya nama class berubah)
+    
     @GetMapping("/login")
     public String showLogin(Model model, HttpSession session) {
-        // Cek apakah sudah login
+        // ... (kode sama)
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         boolean isLoggedIn = auth != null
                 && auth.isAuthenticated()
@@ -60,7 +63,8 @@ public class AuthView {
             BindingResult bindingResult,
             HttpSession session,
             Model model) {
-
+        
+        // ... (kode sama persis)
         // Validasi form
         if (bindingResult.hasErrors()) {
             return ConstUtil.TEMPLATE_PAGES_AUTH_LOGIN;
@@ -101,8 +105,8 @@ public class AuthView {
 
     @GetMapping("/register")
     public String showRegister(Model model, HttpSession session) {
-        // Cek apakah sudah login
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        // ... (kode sama persis)
+         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         boolean isLoggedIn = auth != null
                 && auth.isAuthenticated()
                 && !(auth instanceof AnonymousAuthenticationToken);
@@ -120,9 +124,9 @@ public class AuthView {
             RedirectAttributes redirectAttributes,
             HttpSession session,
             Model model) {
-
-        // Validasi form
-        if (bindingResult.hasErrors()) {
+            
+        // ... (kode sama persis)
+         if (bindingResult.hasErrors()) {
             return ConstUtil.TEMPLATE_PAGES_AUTH_REGISTER;
         }
 
@@ -145,7 +149,7 @@ public class AuthView {
             return ConstUtil.TEMPLATE_PAGES_AUTH_REGISTER;
         }
 
-        // 🔥 Kirim pesan sukses pakai Flash Attribute
+        // Kirim pesan sukses pakai Flash Attribute
         redirectAttributes.addFlashAttribute("success", "Akun berhasil dibuat! Silakan login.");
 
         return "redirect:/auth/login";

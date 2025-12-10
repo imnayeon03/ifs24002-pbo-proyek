@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layouts/base :: layout(~{::title}, ~{::section}, ~{::script})}">
+<head>
+    <title>Form Produk</title>
+</head>
+<body>
+<section>
+    <div class="container py-4">
+        <div class="card shadow-sm mx-auto border-0" style="max-width: 700px;">
+            
+            <!-- Header Dinamis: Teks berubah sesuai mode (Tambah/Edit) -->
+            <div class="card-header bg-primary text-white py-3">
+                <h5 class="mb-0">
+                    <i class="fas" th:classappend="${productId != null} ? 'fa-edit' : 'fa-plus-circle'"></i>
+                    <span th:text="${productId != null} ? 'Edit Produk' : 'Tambah Produk Baru'">Form Produk</span>
+                </h5>
+            </div>
+
+            <div class="card-body p-4">
+                <!-- 
+                   LOGIKA FORM ACTION:
+                   - Jika productId ADA (tidak null) -> Arahkan ke /products/update/{id}
+                   - Jika productId TIDAK ADA        -> Arahkan ke /products/save
+                -->
+                <form th:action="${productId != null} ? @{/products/update/{id}(id=${productId})} : @{/products/save}" 
+                      th:object="${productForm}" 
+                      method="post" 
+                      enctype="multipart/form-data">
+                    
+                    <!-- Nama Produk -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Nama Produk <span class="text-danger">*</span></label>
+                        <input type="text" th:field="*{name}" class="form-control" 
+                               th:classappend="${#fields.hasErrors('name')} ? 'is-invalid'"
+                               placeholder="Contoh: Kemeja Flannel">
+                        <div class="invalid-feedback" th:errors="*{name}"></div>
+                    </div>
+
+                    <!-- Kategori -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Kategori <span class="text-danger">*</span></label>
+                        <select th:field="*{category}" class="form-select">
+                            <option value="Elektronik">Elektronik</option>
+                            <option value="Pakaian">Pakaian</option>
+                            <option value="Makanan">Makanan</option>
+                            <option value="Minuman">Minuman</option>
+                            <option value="Aksesoris">Aksesoris</option>
+                            <option value="Lainnya">Lainnya</option>
+                        </select>
+                    </div>
+
+                    <div class="row">
+                        <!-- Harga -->
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Harga (Rp) <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text">Rp</span>
+                                <input type="number" th:field="*{price}" class="form-control" 
+                                       th:classappend="${#fields.hasErrors('price')} ? 'is-invalid'">
+                                <div class="invalid-feedback" th:errors="*{price}"></div>
+                            </div>
+                        </div>
+
+                        <!-- Stok -->
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Stok Awal <span class="text-danger">*</span></label>
+                            <input type="number" th:field="*{stock}" class="form-control" 
+                                   th:classappend="${#fields.hasErrors('stock')} ? 'is-invalid'">
+                            <div class="invalid-feedback" th:errors="*{stock}"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Deskripsi -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Deskripsi</label>
+                        <textarea th:field="*{description}" class="form-control" rows="3" placeholder="Jelaskan detail produk..."></textarea>
+                    </div>
+
+                    <!-- Upload Gambar -->
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Gambar Produk</label>
+                        
+                        <!-- Preview Gambar Lama (Hanya muncul saat Edit & ada gambar) -->
+                        <div th:if="${currentImage != null}" class="mb-2 p-2 border rounded bg-light d-inline-block">
+                            <small class="d-block text-muted mb-1">Gambar saat ini:</small>
+                            <img th:src="@{'/uploads/' + ${currentImage}}" width="100" class="rounded">
+                        </div>
+
+                        <input type="file" name="imageFile" class="form-control" accept="image/*">
+                        <div class="form-text small">Format: JPG, PNG. Maks 5MB. Biarkan kosong jika tidak ingin mengubah gambar (saat edit).</div>
+                    </div>
+
+                    <hr>
+
+                    <!-- Tombol Aksi -->
+                    <div class="d-flex justify-content-end gap-2">
+                        <a th:href="@{/products}" class="btn btn-secondary px-4">Batal</a>
+                        <button type="submit" class="btn btn-primary px-4">
+                            <i class="fas fa-save me-1"></i> Simpan
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+<script></script>
+</body>
+</html>

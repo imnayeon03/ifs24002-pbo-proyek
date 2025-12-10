@@ -1,174 +1,121 @@
 <!DOCTYPE html>
-<html
-  xmlns:th="http://www.thymeleaf.org"
-  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-  layout:decorate="~{layouts/base}"
-  lang="id"
->
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Spring Boot Todolist</title>
-  </head>
-  <body>
-    <div layout:fragment="content" class="mt-3">
-      <div class="card">
-        <div class="card-header d-flex">
-          <div class="flex-fill">
-            <h3>Hay, [[${auth.name}]]</h3>
-          </div>
-          <div>
-            <div>
-              <a th:href="@{/auth/logout}" class="btn btn-sm btn-danger"
-                >Keluar</a
-              >
+<html lang="id" xmlns:th="http://www.thymeleaf.org" 
+      th:replace="~{layouts/base :: layout(~{::title}, ~{::section}, ~{::script})}">
+<head>
+    <title>Beranda - Toko App</title>
+</head>
+<body>
+
+    <section>
+        <!-- TAMPILAN JIKA BELUM LOGIN -->
+        <div th:if="${user == null}" class="p-5 mb-4 bg-light rounded-3 text-center shadow-sm border">
+            <div class="container-fluid py-5">
+                <h1 class="display-5 fw-bold text-primary">Selamat Datang di Toko App</h1>
+                <p class="col-md-8 fs-4 mx-auto text-muted">
+                    Aplikasi manajemen toko sederhana untuk mengelola Produk, Stok, dan memantau aset penjualan Anda dengan mudah.
+                </p>
+                <div class="mt-4">
+                    <a th:href="@{/auth/login}" class="btn btn-primary btn-lg px-4 me-md-2">Masuk Sekarang</a>
+                    <a th:href="@{/auth/register}" class="btn btn-outline-secondary btn-lg px-4">Daftar Akun</a>
+                </div>
             </div>
-          </div>
         </div>
-        <div class="card-body">
-          <div class="d-flex mb-2">
-            <div class="flex-fill">
-              <h3>Daftar Todo List</h3>
-            </div>
-            <div>
-              <button
-                class="btn btn-primary"
-                data-bs-toggle="modal"
-                data-bs-target="#addTodoModal"
-              >
-                Tambah Todo
-              </button>
-            </div>
-          </div>
-          <table class="table table-striped">
-            <tr class="table-light">
-              <th>No</th>
-              <th>Judul</th>
-              <th>Dibuat pada</th>
-              <th>Diubah pada</th>
-              <th>Status</th>
-              <th>Tindakan</th>
-            </tr>
 
-            <tr th:each="todo, status : ${todos}">
-              <td th:text="${status.index + 1}"></td>
-              <td th:text="${todo.title}"></td>
-              <td
-                th:text="${#temporals.format(todo.createdAt, 'd MMMM yyyy, HH:mm')}"
-              ></td>
-              <td
-                th:text="${#temporals.format(todo.updatedAt, 'd MMMM yyyy, HH:mm')}"
-              ></td>
-              <td>
-                <span th:if="${todo.finished}" class="badge bg-success"
-                  >Selesai</span
-                >
-                <span th:unless="${todo.finished}" class="badge bg-danger"
-                  >Belum selesai</span
-                >
-              </td>
-              <td>
-                <a
-                  th:href="@{/todos/{todoId}(todoId=${todo.id})}"
-                  class="btn btn-sm btn-info"
-                >
-                  Detail
-                </a>
-                <button
-                  th:id="|editTodoButton_${todo.id}|"
-                  th:attr="onclick=|prepareEditTodo(`${todo.id}`, `${todo.title}`, `${todo.description}`, ${todo.finished})|"
-                  class="btn btn-sm btn-warning"
-                >
-                  Edit
-                </button>
-                <button
-                  th:id="|deleteTodoButton_${todo.id}|"
-                  th:attr="onclick=|prepareDeleteTodo(`${todo.id}`, `${todo.title}`)|"
-                  class="btn btn-sm btn-danger"
-                >
-                  Hapus
-                </button>
-              </td>
-            </tr>
-            <tr th:if="${#lists.isEmpty(todos)}">
-              <td colspan="6" class="text-center">
-                Belum ada data todo yang tersedia.
-              </td>
-            </tr>
-          </table>
+        <!-- TAMPILAN JIKA SUDAH LOGIN (DASHBOARD) -->
+        <div th:if="${user != null}">
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h2 class="fw-light">Halo, <span class="fw-bold" th:text="${user.name}">User</span>!</h2>
+                    <p class="text-muted">Berikut adalah ringkasan toko Anda hari ini.</p>
+                </div>
+            </div>
+
+            <!-- Kartu Statistik -->
+            <div class="row g-4 mb-5">
+                <!-- Total Produk -->
+                <div class="col-md-4">
+                    <div class="card card-stat bg-primary text-white h-100 shadow">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="card-title text-uppercase mb-2 opacity-75">Total Produk</h6>
+                                    <h2 class="display-4 fw-bold" th:text="${totalProducts}">0</h2>
+                                </div>
+                                <i class="fas fa-box-open fa-4x opacity-25"></i>
+                            </div>
+                            <p class="mt-3 mb-0 small">Item tersedia di gudang</p>
+                        </div>
+                        <div class="card-footer bg-transparent border-0">
+                            <a th:href="@{/products}" class="text-white text-decoration-none stretched-link">Lihat Detail &rarr;</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Total Kategori -->
+                <div class="col-md-4">
+                    <div class="card card-stat bg-success text-white h-100 shadow">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="card-title text-uppercase mb-2 opacity-75">Kategori Unik</h6>
+                                    <h2 class="display-4 fw-bold" th:text="${totalCategories}">0</h2>
+                                </div>
+                                <i class="fas fa-tags fa-4x opacity-25"></i>
+                            </div>
+                            <p class="mt-3 mb-0 small">Variasi jenis produk</p>
+                        </div>
+                        <div class="card-footer bg-transparent border-0">
+                            <a th:href="@{/products/chart}" class="text-white text-decoration-none stretched-link">Lihat Grafik &rarr;</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Nilai Aset -->
+                <div class="col-md-4">
+                    <div class="card card-stat bg-warning text-dark h-100 shadow">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="card-title text-uppercase mb-2 opacity-75">Estimasi Aset</h6>
+                                    <!-- Format Rupiah -->
+                                    <h3 class="fw-bold" th:text="'Rp ' + ${#numbers.formatDecimal(totalAssetValue, 0, 'COMMA', 0, 'POINT')}">Rp 0</h3>
+                                </div>
+                                <i class="fas fa-coins fa-4x opacity-25"></i>
+                            </div>
+                            <p class="mt-3 mb-0 small">Total nilai (Harga x Stok)</p>
+                        </div>
+                        <div class="card-footer bg-transparent border-0">
+                            <small>Data berdasarkan input stok terkini</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-header bg-white py-3">
+                            <h5 class="mb-0 fw-bold"><i class="fas fa-rocket me-2 text-primary"></i>Aksi Cepat</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-grid gap-2 d-md-block">
+                                <a th:href="@{/products/create}" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-plus me-1"></i> Tambah Produk Baru
+                                </a>
+                                <a th:href="@{/products}" class="btn btn-outline-dark btn-lg">
+                                    <i class="fas fa-list me-1"></i> Kelola Daftar Produk
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
+    </section>
 
-      <!-- Modals -->
-      <div th:replace="~{models/todos/add :: addTodoModal}"></div>
-      <div th:replace="~{models/todos/edit :: editTodoModal}"></div>
-      <div th:replace="~{models/todos/delete :: deleteTodoModal}"></div>
-    </div>
+    <!-- Script kosong jika tidak ada js khusus -->
+    <script></script>
 
-    <!-- Scripts -->
-    <script layout:fragment="others-js">
-      function prepareEditTodo(id, title, description, finished) {
-        /* Set nilai pada form edit */
-        document.getElementById("editTodoId").value = id;
-        document.getElementById("editTodoTitle").value = title;
-        document.getElementById("editTodoDescription").value = description;
-        document.getElementById("editTodoFinished").value = finished
-          ? "1"
-          : "0";
-
-        /* Tampilkan modal */
-        var editModal = new bootstrap.Modal(
-          document.getElementById("editTodoModal")
-        );
-        editModal.show();
-      }
-
-      function prepareDeleteTodo(id, title) {
-        /* Set nilai pada form delete */
-        document.getElementById("deleteTodoId").value = id;
-        document.getElementById("deleteTodoTitle").innerText = title;
-
-        /* Tampilkan modal */
-        var deleteModal = new bootstrap.Modal(
-          document.getElementById("deleteTodoModal")
-        );
-        deleteModal.show();
-      }
-
-      document.addEventListener("DOMContentLoaded", function () {
-        /* Cek apakah modal add perlu dibuka otomatis */
-        var addTodoModalOpen = "[[${addTodoModalOpen}]]" === "true";
-        if (addTodoModalOpen) {
-          var addModal = new bootstrap.Modal(
-            document.getElementById("addTodoModal")
-          );
-          addModal.show();
-        }
-
-        /* Cek apakah modal edit perlu dibuka otomatis */
-        var editTodoModalOpen = "[[${editTodoModalOpen}]]" === "true";
-        if (editTodoModalOpen) {
-          const editTodoModalId = "[[${editTodoModalId}]]";
-          const buttonEdit = document.getElementById(
-            `editTodoButton_${editTodoModalId}`
-          );
-          if (buttonEdit) {
-            buttonEdit.click();
-          }
-        }
-
-        /* Cek apakah modal delete perlu dibuka otomatis */
-        var deleteTodoModalOpen = "[[${deleteTodoModalOpen}]]" === "true";
-        if (deleteTodoModalOpen) {
-          const deleteTodoModalId = "[[${deleteTodoModalId}]]";
-          const buttonDelete = document.getElementById(
-            `deleteTodoButton_${deleteTodoModalId}`
-          );
-          if (buttonDelete) {
-            buttonDelete.click();
-          }
-        }
-      });
-    </script>
-  </body>
+</body>
 </html>
