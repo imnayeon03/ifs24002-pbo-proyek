@@ -2,58 +2,180 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>Grafik Stok Produk</title>
+    
+    <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Load Chart.js -->
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <!-- Google Fonts (Poppins) -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f4f6f9; /* Abu-abu sangat muda untuk background halaman */
+            color: #333;
+        }
+        .card {
+            border: none;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
+        .card-header {
+            background-color: #fff;
+            border-bottom: 1px solid #f0f0f0;
+            padding: 20px 30px;
+        }
+        .btn-back {
+            background-color: white;
+            color: #555;
+            border: 1px solid #ddd;
+            transition: all 0.3s ease;
+            border-radius: 50px;
+            padding: 8px 20px;
+        }
+        .btn-back:hover {
+            background-color: #333;
+            color: white;
+            transform: translateX(-3px);
+        }
+        #chartContainer {
+            position: relative;
+            height: 400px;
+            width: 100%;
+        }
+        /* Loading Spinner Overlay */
+        #loadingSpinner {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(255,255,255,0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+        }
+    </style>
 </head>
 <body class="container py-5">
-    <h2>Grafik Stok per Kategori</h2>
-    <a href="/products" class="btn btn-secondary mb-4">Kembali ke Daftar</a>
 
-    <div class="card">
-        <div class="card-body">
-            <canvas id="stockChart" style="max-height: 400px;"></canvas>
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            
+            <!-- Header Section -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="fw-bold mb-0">Dashboard Stok</h2>
+                    <p class="text-muted">Visualisasi data stok produk per kategori</p>
+                </div>
+                <a href="/products" class="btn btn-back text-decoration-none fw-bold">
+                    <i class="bi bi-arrow-left me-2"></i> Kembali
+                </a>
+            </div>
+
+            <!-- Card Chart -->
+            <div class="card">
+                <div class="card-body p-4">
+                    <div id="chartContainer">
+                        <!-- Loading Animation -->
+                        <div id="loadingSpinner">
+                            <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                        <canvas id="stockChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 
     <script>
         document.addEventListener("DOMContentLoaded", function() {
+            const ctx = document.getElementById('stockChart').getContext('2d');
+            const spinner = document.getElementById('loadingSpinner');
+
             fetch('/products/api/chart-data')
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) throw new Error("Gagal mengambil data");
+                    return response.json();
+                })
                 .then(data => {
-                    // Data dari server berupa List<Object[]> -> [ ["Elektronik", 10], ["Pakaian", 5] ]
+                    // Sembunyikan spinner setelah data diterima
+                    spinner.style.display = 'none';
+
                     const labels = data.map(item => item[0]);
                     const values = data.map(item => item[1]);
 
-                    const ctx = document.getElementById('stockChart').getContext('2d');
+                    // Membuat Warna Gradasi (Ungu ke Biru)
+                    let gradient = ctx.createLinearGradient(0, 0, 0, 400);
+                    gradient.addColorStop(0, 'rgba(111, 66, 193, 0.8)'); // Ungu
+                    gradient.addColorStop(1, 'rgba(0, 123, 255, 0.3)');  // Biru transparan
+
                     new Chart(ctx, {
-                        type: 'bar', // Bisa diganti 'pie', 'line', dll
+                        type: 'bar',
                         data: {
                             labels: labels,
                             datasets: [{
-                                label: 'Total Stok',
+                                label: 'Jumlah Stok',
                                 data: values,
-                                backgroundColor: [
-                                    'rgba(255, 99, 132, 0.5)',
-                                    'rgba(54, 162, 235, 0.5)',
-                                    'rgba(255, 206, 86, 0.5)',
-                                    'rgba(75, 192, 192, 0.5)'
-                                ],
-                                borderColor: [
-                                    'rgba(255, 99, 132, 1)',
-                                    'rgba(54, 162, 235, 1)',
-                                    'rgba(255, 206, 86, 1)',
-                                    'rgba(75, 192, 192, 1)'
-                                ],
-                                borderWidth: 1
+                                backgroundColor: gradient,
+                                borderColor: 'rgba(111, 66, 193, 1)',
+                                borderWidth: 1,
+                                borderRadius: 10, // Membuat sudut batang membulat
+                                barPercentage: 0.6, // Mengatur ketebalan batang
+                                hoverBackgroundColor: 'rgba(111, 66, 193, 1)'
                             }]
                         },
                         options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    display: false // Sembunyikan legend jika hanya 1 dataset agar bersih
+                                },
+                                tooltip: {
+                                    backgroundColor: '#333',
+                                    padding: 12,
+                                    titleFont: { size: 14, family: 'Poppins' },
+                                    bodyFont: { size: 14, family: 'Poppins' },
+                                    cornerRadius: 8,
+                                    displayColors: false
+                                }
+                            },
                             scales: {
-                                y: { beginAtZero: true }
+                                y: {
+                                    beginAtZero: true,
+                                    grid: {
+                                        color: '#f0f0f0',
+                                        borderDash: [5, 5] // Garis putus-putus
+                                    },
+                                    ticks: {
+                                        font: { family: 'Poppins' }
+                                    }
+                                },
+                                x: {
+                                    grid: {
+                                        display: false // Hilangkan grid vertikal
+                                    },
+                                    ticks: {
+                                        font: { family: 'Poppins', weight: '600' }
+                                    }
+                                }
+                            },
+                            animation: {
+                                duration: 1500,
+                                easing: 'easeOutQuart'
                             }
                         }
                     });
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    spinner.innerHTML = '<p class="text-danger">Gagal memuat data grafik.</p>';
                 });
         });
     </script>
