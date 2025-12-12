@@ -6,101 +6,75 @@
 </head>
 <body>
 <section>
-    <div class="container py-4">
-        <div class="card shadow-sm mx-auto border-0" style="max-width: 700px;">
-            
-            <!-- Header Dinamis: Teks berubah sesuai mode (Tambah/Edit) -->
-            <div class="card-header bg-primary text-white py-3">
-                <h5 class="mb-0">
-                    <i class="fas" th:classappend="${productId != null} ? 'fa-edit' : 'fa-plus-circle'"></i>
-                    <span th:text="${productId != null} ? 'Edit Produk' : 'Tambah Produk Baru'">Form Produk</span>
-                </h5>
-            </div>
-
-            <div class="card-body p-4">
-                <!-- 
-                   LOGIKA FORM ACTION:
-                   - Jika productId ADA (tidak null) -> Arahkan ke /products/update/{id}
-                   - Jika productId TIDAK ADA        -> Arahkan ke /products/save
-                -->
-                <form th:action="${productId != null} ? @{/products/update/{id}(id=${productId})} : @{/products/save}" 
-                      th:object="${productForm}" 
-                      method="post" 
-                      enctype="multipart/form-data">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 col-xl-7">
+                <div class="card shadow-lg border-0 rounded-4">
+                    <div class="card-header bg-white py-4 border-0 text-center">
+                        <h4 class="fw-bold text-dark mb-0" 
+                            th:text="${productId != null} ? 'Edit Produk' : 'Tambah Produk Baru'">Form</h4>
+                    </div>
                     
-                    <!-- Nama Produk -->
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Nama Produk <span class="text-danger">*</span></label>
-                        <input type="text" th:field="*{name}" class="form-control" 
-                               th:classappend="${#fields.hasErrors('name')} ? 'is-invalid'"
-                               placeholder="Contoh: Kemeja Flannel">
-                        <div class="invalid-feedback" th:errors="*{name}"></div>
-                    </div>
+                    <div class="card-body p-4 p-md-5 pt-2">
+                        <form th:action="${productId != null} ? @{/products/update/{id}(id=${productId})} : @{/products/save}" 
+                              th:object="${productForm}" method="post" enctype="multipart/form-data">
 
-                    <!-- Kategori -->
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Kategori <span class="text-danger">*</span></label>
-                        <select th:field="*{category}" class="form-select">
-                            <option value="Elektronik">Elektronik</option>
-                            <option value="Pakaian">Pakaian</option>
-                            <option value="Makanan">Makanan</option>
-                            <option value="Minuman">Minuman</option>
-                            <option value="Aksesoris">Aksesoris</option>
-                            <option value="Lainnya">Lainnya</option>
-                        </select>
-                    </div>
-
-                    <div class="row">
-                        <!-- Harga -->
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">Harga (Rp) <span class="text-danger">*</span></label>
-                            <div class="input-group">
-                                <span class="input-group-text">Rp</span>
-                                <input type="number" th:field="*{price}" class="form-control" 
-                                       th:classappend="${#fields.hasErrors('price')} ? 'is-invalid'">
-                                <div class="invalid-feedback" th:errors="*{price}"></div>
+                            <!-- Nama -->
+                            <div class="form-floating mb-3">
+                                <input type="text" th:field="*{name}" class="form-control" id="floatingName" placeholder="Nama"
+                                       th:classappend="${#fields.hasErrors('name')} ? 'is-invalid'">
+                                <label for="floatingName">Nama Produk</label>
+                                <div class="invalid-feedback" th:errors="*{name}"></div>
                             </div>
-                        </div>
 
-                        <!-- Stok -->
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">Stok Awal <span class="text-danger">*</span></label>
-                            <input type="number" th:field="*{stock}" class="form-control" 
-                                   th:classappend="${#fields.hasErrors('stock')} ? 'is-invalid'">
-                            <div class="invalid-feedback" th:errors="*{stock}"></div>
-                        </div>
+                            <!-- Kategori -->
+                            <div class="form-floating mb-3">
+                                <select th:field="*{category}" class="form-select" id="floatingCat">
+                                    <option value="Elektronik">Elektronik</option>
+                                    <option value="Pakaian">Pakaian</option>
+                                    <option value="Makanan">Makanan</option>
+                                    <option value="Minuman">Minuman</option>
+                                    <option value="Aksesoris">Aksesoris</option>
+                                    <option value="Lainnya">Lainnya</option>
+                                </select>
+                                <label for="floatingCat">Kategori</label>
+                            </div>
+
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-bold text-muted">Harga (Rp)</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text border-end-0 bg-light">Rp</span>
+                                        <input type="number" th:field="*{price}" class="form-control border-start-0 ps-0" 
+                                               th:classappend="${#fields.hasErrors('price')} ? 'is-invalid'">
+                                    </div>
+                                    <div class="text-danger small mt-1" th:errors="*{price}"></div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-bold text-muted">Stok Awal</label>
+                                    <input type="number" th:field="*{stock}" class="form-control" 
+                                           th:classappend="${#fields.hasErrors('stock')} ? 'is-invalid'">
+                                    <div class="text-danger small mt-1" th:errors="*{stock}"></div>
+                                </div>
+                            </div>
+
+                            <!-- Gambar -->
+                            <div class="mb-4 bg-light p-3 rounded border border-dashed text-center">
+                                <div th:if="${currentImage != null}" class="mb-3">
+                                    <img th:src="@{'/uploads/' + ${currentImage}}" class="rounded shadow-sm" style="height: 80px;">
+                                    <div class="small text-muted mt-1">Gambar saat ini</div>
+                                </div>
+                                <label class="form-label small fw-bold">Upload Gambar Produk</label>
+                                <input type="file" name="imageFile" class="form-control form-control-sm mx-auto" style="max-width: 80%;" accept="image/*">
+                            </div>
+
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                <a th:href="@{/products}" class="btn btn-light text-muted fw-bold px-4">Batal</a>
+                                <button type="submit" class="btn btn-primary fw-bold px-5 rounded-pill shadow-sm">Simpan Data</button>
+                            </div>
+                        </form>
                     </div>
-                    
-                    <!-- Deskripsi -->
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Deskripsi</label>
-                        <textarea th:field="*{description}" class="form-control" rows="3" placeholder="Jelaskan detail produk..."></textarea>
-                    </div>
-
-                    <!-- Upload Gambar -->
-                    <div class="mb-4">
-                        <label class="form-label fw-bold">Gambar Produk</label>
-                        
-                        <!-- Preview Gambar Lama (Hanya muncul saat Edit & ada gambar) -->
-                        <div th:if="${currentImage != null}" class="mb-2 p-2 border rounded bg-light d-inline-block">
-                            <small class="d-block text-muted mb-1">Gambar saat ini:</small>
-                            <img th:src="@{'/uploads/' + ${currentImage}}" width="100" class="rounded">
-                        </div>
-
-                        <input type="file" name="imageFile" class="form-control" accept="image/*">
-                        <div class="form-text small">Format: JPG, PNG. Maks 5MB. Biarkan kosong jika tidak ingin mengubah gambar (saat edit).</div>
-                    </div>
-
-                    <hr>
-
-                    <!-- Tombol Aksi -->
-                    <div class="d-flex justify-content-end gap-2">
-                        <a th:href="@{/products}" class="btn btn-secondary px-4">Batal</a>
-                        <button type="submit" class="btn btn-primary px-4">
-                            <i class="fas fa-save me-1"></i> Simpan
-                        </button>
-                    </div>
-                </form>
+                </div>
             </div>
         </div>
     </div>

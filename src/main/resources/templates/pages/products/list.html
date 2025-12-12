@@ -6,109 +6,83 @@
 </head>
 <body>
 <section>
-    <!-- Header Halaman -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h2 class="fw-bold mb-0">Daftar Produk</h2>
-            <p class="text-muted small">Kelola data inventaris toko Anda.</p>
+    <div class="container">
+        <!-- Header Section -->
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+            <div>
+                <h2 class="fw-bold mb-1 text-dark">Inventaris Produk</h2>
+                <p class="text-muted small mb-0">Kelola stok dan harga produk Anda di sini.</p>
+            </div>
+            <a th:href="@{/products/create}" class="btn btn-primary rounded-pill px-4 shadow-sm">
+                <i class="fas fa-plus me-2"></i>Tambah Produk
+            </a>
         </div>
-        <a th:href="@{/products/create}" class="btn btn-primary shadow-sm">
-            <i class="fas fa-plus me-1"></i> Tambah Produk
-        </a>
-    </div>
 
-    <!-- Alert Sukses (Muncul jika ada flash attribute 'success') -->
-    <div th:if="${success}" class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
-        <i class="fas fa-check-circle me-2"></i>
-        <span th:text="${success}"></span>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
+        <!-- Alert Notification -->
+        <div th:if="${success}" class="alert alert-success alert-dismissible fade show border-0 shadow-sm mb-4" role="alert">
+            <i class="fas fa-check-circle me-2"></i> <span th:text="${success}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
 
-    <!-- Tabel Data -->
-    <div class="card shadow-sm border-0 overflow-hidden">
-        <div class="card-body p-0">
+        <!-- Table Card -->
+        <div class="card overflow-hidden">
             <div class="table-responsive">
-                <table class="table table-striped table-hover align-middle mb-0">
-                    <thead class="table-dark">
+                <table class="table table-hover align-middle mb-0" style="min-width: 800px;">
+                    <thead class="bg-light text-uppercase text-secondary small">
                         <tr>
-                            <th class="py-3 ps-4">Gambar</th>
-                            <th class="py-3">Nama Produk</th>
-                            <th class="py-3">Kategori</th>
-                            <th class="py-3">Harga</th>
-                            <th class="py-3">Stok</th>
-                            <th class="py-3 text-center" style="width: 220px;">Aksi</th>
+                            <th class="py-3 ps-4 border-0">Produk</th>
+                            <th class="py-3 border-0">Kategori</th>
+                            <th class="py-3 border-0">Harga</th>
+                            <th class="py-3 border-0">Stok</th>
+                            <th class="py-3 text-center border-0">Aksi</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        <!-- Loop Data Produk -->
+                    <tbody class="border-top-0">
                         <tr th:each="p : ${products}">
                             <td class="ps-4">
-                                <!-- Gambar -->
-                                <img th:if="${p.image}" th:src="@{'/uploads/' + ${p.image}}" 
-                                     alt="Img" width="50" height="50" 
-                                     class="rounded border shadow-sm" style="object-fit: cover;">
-                                
-                                <!-- Placeholder jika tidak ada gambar -->
-                                <div th:unless="${p.image}" class="bg-secondary text-white rounded d-flex align-items-center justify-content-center small" 
-                                     style="width: 50px; height: 50px;">
-                                     <i class="fas fa-camera"></i>
+                                <div class="d-flex align-items-center">
+                                    <!-- SMART IMAGE: Ada fallback jika error -->
+                                    <img th:src="${p.image != null} ? @{'/uploads/' + ${p.image}} : 'https://placehold.co/100x100/e9ecef/6c757d?text=No+Img'"
+                                         onerror="this.onerror=null; this.src='https://placehold.co/100x100/e9ecef/6c757d?text=Error';"
+                                         class="rounded-3 border shadow-sm me-3" 
+                                         style="width: 48px; height: 48px; object-fit: cover;">
+                                    
+                                    <div>
+                                        <div class="fw-bold text-dark" th:text="${p.name}">Nama Produk</div>
+                                        <small class="text-muted" th:text="'ID: #' + ${p.id}">#123</small>
+                                    </div>
                                 </div>
                             </td>
-                            
-                            <!-- Nama -->
-                            <td class="fw-bold text-dark" th:text="${p.name}">Nama</td>
-                            
-                            <!-- Kategori -->
-                            <td><span class="badge bg-secondary rounded-pill fw-normal" th:text="${p.category}">Kategori</span></td>
-                            
-                            <!-- Harga (Format Rupiah) -->
-                            <td class="text-success fw-bold" 
-                                th:text="'Rp ' + ${#numbers.formatDecimal(p.price, 0, 'COMMA', 0, 'POINT')}">Rp 0</td>
-                            
-                            <!-- Stok (Merah jika habis) -->
                             <td>
-                                <span th:class="${p.stock > 0} ? 'text-dark' : 'text-danger fw-bold'" 
-                                      th:text="${p.stock > 0} ? ${p.stock} : 'Habis'">0</span>
+                                <span class="badge bg-light text-secondary border fw-normal px-3 py-2 rounded-pill" th:text="${p.category}">Kat</span>
                             </td>
-                            
-                            <!-- Tombol Aksi -->
+                            <td class="fw-bold text-dark" 
+                                th:text="'Rp ' + ${#numbers.formatDecimal(p.price, 0, 'COMMA', 0, 'POINT')}">Rp 0</td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <span class="badge rounded-circle p-1 me-2" 
+                                          th:classappend="${p.stock > 0} ? 'bg-success' : 'bg-danger'"></span>
+                                    <span th:text="${p.stock > 0} ? ${p.stock} + ' unit' : 'Habis'" 
+                                          th:class="${p.stock > 0} ? 'text-dark' : 'text-danger fw-bold'"></span>
+                                </div>
+                            </td>
                             <td class="text-center">
-                                <div class="btn-group" role="group">
-                                    
-                                    <!-- Tombol Detail -->
-                                    <a th:href="@{/products/detail/{id}(id=${p.id})}" 
-                                       class="btn btn-sm btn-info text-white" 
-                                       title="Lihat Detail">
-                                        <i class="fas fa-eye"></i>
-                                    </a>
-
-                                    <!-- Tombol Edit -->
-                                    <a th:href="@{/products/edit/{id}(id=${p.id})}" 
-                                       class="btn btn-sm btn-warning text-white" 
-                                       title="Edit Data">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-
-                                    <!-- Tombol Hapus (FORM POST) -->
-                                    <!-- Penting: Gunakan Form agar methodnya POST, bukan GET -->
-                                    <form th:action="@{/products/delete/{id}(id=${p.id})}" method="post" 
-                                          onsubmit="return confirm('Apakah Anda yakin ingin menghapus produk ini?');" 
-                                          style="display: inline;">
-                                        <button type="submit" class="btn btn-sm btn-danger rounded-0 rounded-end" title="Hapus Data">
-                                            <i class="fas fa-trash-alt"></i>
-                                        </button>
+                                <div class="btn-group shadow-sm" role="group">
+                                    <a th:href="@{/products/detail/{id}(id=${p.id})}" class="btn btn-sm btn-white border text-secondary" title="Detail"><i class="fas fa-eye"></i></a>
+                                    <a th:href="@{/products/edit/{id}(id=${p.id})}" class="btn btn-sm btn-white border text-primary" title="Edit"><i class="fas fa-pen"></i></a>
+                                    <form th:action="@{/products/delete/{id}(id=${p.id})}" method="post" onsubmit="return confirm('Hapus produk ini?');" style="display:inline;">
+                                        <button type="submit" class="btn btn-sm btn-white border text-danger rounded-end" title="Hapus"><i class="fas fa-trash"></i></button>
                                     </form>
-
                                 </div>
                             </td>
                         </tr>
-
-                        <!-- Tampilan Jika Data Kosong -->
+                        
+                        <!-- Empty State -->
                         <tr th:if="${#lists.isEmpty(products)}">
-                            <td colspan="6" class="text-center py-5 text-muted">
-                                <i class="fas fa-box-open fa-3x mb-3 opacity-25"></i>
-                                <p class="mb-1">Belum ada produk.</p>
-                                <a th:href="@{/products/create}" class="btn btn-sm btn-outline-primary mt-2">Tambah Data Baru</a>
+                            <td colspan="5" class="text-center py-5">
+                                <div class="opacity-50 mb-3"><i class="fas fa-box-open fa-3x text-secondary"></i></div>
+                                <h5 class="text-muted">Belum ada produk</h5>
+                                <a th:href="@{/products/create}" class="btn btn-sm btn-outline-primary mt-2">Tambah Data</a>
                             </td>
                         </tr>
                     </tbody>
@@ -117,8 +91,7 @@
         </div>
     </div>
 </section>
-
-<!-- Script Kosong -->
+<!-- Script kosong wajib ada untuk layout -->
 <script></script>
 </body>
 </html>
