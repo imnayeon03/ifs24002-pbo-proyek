@@ -6,7 +6,7 @@
 </head>
 <body>
 <section>
-    <div class="container">
+    <div class="container py-4"> <!-- Tambah padding y agar tidak mepet -->
         <div class="row justify-content-center">
             <div class="col-lg-8 col-xl-7">
                 <div class="card shadow-lg border-0 rounded-4">
@@ -19,7 +19,7 @@
                         <form th:action="${productId != null} ? @{/products/update/{id}(id=${productId})} : @{/products/save}" 
                               th:object="${productForm}" method="post" enctype="multipart/form-data">
 
-                            <!-- Nama -->
+                            <!-- 1. Nama Produk -->
                             <div class="form-floating mb-3">
                                 <input type="text" th:field="*{name}" class="form-control" id="floatingName" placeholder="Nama"
                                        th:classappend="${#fields.hasErrors('name')} ? 'is-invalid'">
@@ -27,7 +27,7 @@
                                 <div class="invalid-feedback" th:errors="*{name}"></div>
                             </div>
 
-                            <!-- Kategori -->
+                            <!-- 2. Kategori -->
                             <div class="form-floating mb-3">
                                 <select th:field="*{category}" class="form-select" id="floatingCat">
                                     <option value="Elektronik">Elektronik</option>
@@ -40,6 +40,7 @@
                                 <label for="floatingCat">Kategori</label>
                             </div>
 
+                            <!-- 3. Harga & Stok -->
                             <div class="row g-3 mb-3">
                                 <div class="col-md-6">
                                     <label class="form-label small fw-bold text-muted">Harga (Rp)</label>
@@ -58,7 +59,14 @@
                                 </div>
                             </div>
 
-                            <!-- Gambar -->
+                            <!-- 4. DESKRIPSI (BARU DITAMBAHKAN) -->
+                            <div class="form-floating mb-4">
+                                <textarea class="form-control" placeholder="Deskripsi produk" id="floatingDesc" 
+                                          th:field="*{description}" style="height: 120px"></textarea>
+                                <label for="floatingDesc">Deskripsi Produk (Opsional)</label>
+                            </div>
+
+                            <!-- 5. Gambar -->
                             <div class="mb-4 bg-light p-3 rounded border border-dashed text-center">
                                 <div th:if="${currentImage != null}" class="mb-3">
                                     <img th:src="@{'/uploads/' + ${currentImage}}" class="rounded shadow-sm" style="height: 80px;">
@@ -68,6 +76,9 @@
                                 <input type="file" name="imageFile" class="form-control form-control-sm mx-auto" style="max-width: 80%;" accept="image/*">
                             </div>
 
+                            <hr class="opacity-10 my-4">
+
+                            <!-- Tombol Aksi -->
                             <div class="d-grid gap-2 d-md-flex justify-content-md-end">
                                 <a th:href="@{/products}" class="btn btn-light text-muted fw-bold px-4">Batal</a>
                                 <button type="submit" class="btn btn-primary fw-bold px-5 rounded-pill shadow-sm">Simpan Data</button>
