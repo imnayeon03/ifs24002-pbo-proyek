@@ -6,123 +6,119 @@
 </head>
 <body>
 <section>
-    
-    <!-- CSS Khusus Tabel Produk -->
-    <style>
-        .table-custom thead th {
-            font-weight: 600;
-            text-transform: uppercase;
-            font-size: 0.8rem;
-            letter-spacing: 0.5px;
-            color: #64748b;
-            background-color: #f8fafc;
-            border-bottom: 2px solid #e2e8f0;
-            padding: 1rem;
-        }
-        .table-custom tbody td {
-            vertical-align: middle;
-            padding: 1rem;
-            color: #334155;
-            border-bottom: 1px solid #f1f5f9;
-        }
-        .product-img-box {
-            width: 48px; height: 48px;
-            border-radius: 8px; overflow: hidden;
-            background-color: #f1f5f9;
-        }
-        
-        /* Tombol Aksi */
-        .btn-icon {
-            width: 34px; height: 34px;
-            display: inline-flex; align-items: center; justify-content: center;
-            border-radius: 8px; border: none;
-            transition: all 0.2s;
-        }
-        .btn-view { background: #e0f2fe; color: #0ea5e9; }
-        .btn-view:hover { background: #0ea5e9; color: white; }
-        
-        .btn-edit { background: #ffedd5; color: #f97316; }
-        .btn-edit:hover { background: #f97316; color: white; }
-        
-        .btn-del { background: #fee2e2; color: #ef4444; cursor: pointer; }
-        .btn-del:hover { background: #ef4444; color: white; }
-    </style>
-
-    <div class="container py-4">
-        
-        <!-- Header & Tombol Tambah -->
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <div>
-                <h3 class="fw-bold text-dark mb-1">Daftar Produk</h3>
-                <p class="text-muted mb-0">Kelola inventaris dan stok barang.</p>
-            </div>
-            <a th:href="@{/products/create}" class="btn btn-primary rounded-pill px-4 py-2 fw-bold shadow-sm">
-                <i class="fas fa-plus me-2"></i>Tambah Produk
-            </a>
+    <!-- Header Halaman -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-0">Daftar Produk</h2>
+            <p class="text-muted small">Kelola data inventaris toko Anda.</p>
         </div>
+        <a th:href="@{/products/create}" class="btn btn-primary shadow-sm">
+            <i class="fas fa-plus me-1"></i> Tambah Produk
+        </a>
+    </div>
 
-        <!-- Tabel Produk -->
-        <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+    <!-- Alert Sukses (Muncul jika ada flash attribute 'success') -->
+    <div th:if="${success}" class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+        <i class="fas fa-check-circle me-2"></i>
+        <span th:text="${success}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <!-- Tabel Data -->
+    <div class="card shadow-sm border-0 overflow-hidden">
+        <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-hover table-custom mb-0 align-middle">
-                    <thead>
+                <table class="table table-striped table-hover align-middle mb-0">
+                    <thead class="table-dark">
                         <tr>
-                            <th class="ps-4">Gambar</th>
-                            <th>Nama Produk</th>
-                            <th>Kategori</th>
-                            <th>Harga</th>
-                            <th>Stok</th>
-                            <th class="text-center">Aksi</th>
+                            <th class="py-3 ps-4">Gambar</th>
+                            <th class="py-3">Nama Produk</th>
+                            <th class="py-3">Kategori</th>
+                            <th class="py-3">Harga</th>
+                            <th class="py-3">Stok</th>
+                            <th class="py-3 text-center" style="width: 220px;">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
+                        <!-- Loop Data Produk -->
                         <tr th:each="p : ${products}">
                             <td class="ps-4">
-                                <div class="product-img-box d-flex align-items-center justify-content-center">
-                                    <img th:if="${p.image}" th:src="@{'/uploads/' + ${p.image}}" class="w-100 h-100 object-fit-cover">
-                                    <i th:unless="${p.image}" class="fas fa-image text-muted opacity-25"></i>
+                                <!-- Gambar -->
+                                <img th:if="${p.image}" th:src="@{'/uploads/' + ${p.image}}" 
+                                     alt="Img" width="50" height="50" 
+                                     class="rounded border shadow-sm" style="object-fit: cover;">
+                                
+                                <!-- Placeholder jika tidak ada gambar -->
+                                <div th:unless="${p.image}" class="bg-secondary text-white rounded d-flex align-items-center justify-content-center small" 
+                                     style="width: 50px; height: 50px;">
+                                     <i class="fas fa-camera"></i>
                                 </div>
                             </td>
+                            
+                            <!-- Nama -->
+                            <td class="fw-bold text-dark" th:text="${p.name}">Nama</td>
+                            
+                            <!-- Kategori -->
+                            <td><span class="badge bg-secondary rounded-pill fw-normal" th:text="${p.category}">Kategori</span></td>
+                            
+                            <!-- Harga (Format Rupiah) -->
+                            <td class="text-success fw-bold" 
+                                th:text="'Rp ' + ${#numbers.formatDecimal(p.price, 0, 'COMMA', 0, 'POINT')}">Rp 0</td>
+                            
+                            <!-- Stok (Merah jika habis) -->
                             <td>
-                                <div class="fw-bold text-dark" th:text="${p.name}">Nama</div>
-                                <div class="small text-muted" style="font-size: 11px;">ID: <span th:text="${#strings.abbreviate(p.id, 8)}"></span></div>
+                                <span th:class="${p.stock > 0} ? 'text-dark' : 'text-danger fw-bold'" 
+                                      th:text="${p.stock > 0} ? ${p.stock} : 'Habis'">0</span>
                             </td>
-                            <td>
-                                <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill fw-normal px-3" th:text="${p.category}">Kategori</span>
-                            </td>
-                            <td class="fw-bold" th:text="'Rp ' + ${#numbers.formatDecimal(p.price, 0, 'COMMA', 0, 'POINT')}">Rp 0</td>
-                            <td>
-                                <div class="d-flex align-items-center">
-                                    <span class="rounded-circle me-2" 
-                                          th:classappend="${p.stock > 10 ? 'bg-success' : (p.stock > 0 ? 'bg-warning' : 'bg-danger')}"
-                                          style="width: 8px; height: 8px;"></span>
-                                    <span th:text="${p.stock} + ' Unit'"></span>
-                                </div>
-                            </td>
+                            
+                            <!-- Tombol Aksi -->
                             <td class="text-center">
-                                <div class="d-flex justify-content-center gap-2">
-                                    <a th:href="@{/products/detail/{id}(id=${p.id})}" class="btn-icon btn-view" title="Detail"><i class="fas fa-eye fa-sm"></i></a>
-                                    <a th:href="@{/products/edit/{id}(id=${p.id})}" class="btn-icon btn-edit" title="Edit"><i class="fas fa-pen fa-sm"></i></a>
+                                <div class="btn-group" role="group">
                                     
-                                    <form th:action="@{/products/delete/{id}(id=${p.id})}" method="post" onsubmit="return confirm('Hapus produk ini?');" class="m-0 p-0">
-                                        <button type="submit" class="btn-icon btn-del" title="Hapus"><i class="fas fa-trash fa-sm"></i></button>
+                                    <!-- Tombol Detail -->
+                                    <a th:href="@{/products/detail/{id}(id=${p.id})}" 
+                                       class="btn btn-sm btn-info text-white" 
+                                       title="Lihat Detail">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+
+                                    <!-- Tombol Edit -->
+                                    <a th:href="@{/products/edit/{id}(id=${p.id})}" 
+                                       class="btn btn-sm btn-warning text-white" 
+                                       title="Edit Data">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+
+                                    <!-- Tombol Hapus (FORM POST) -->
+                                    <!-- Penting: Gunakan Form agar methodnya POST, bukan GET -->
+                                    <form th:action="@{/products/delete/{id}(id=${p.id})}" method="post" 
+                                          onsubmit="return confirm('Apakah Anda yakin ingin menghapus produk ini?');" 
+                                          style="display: inline;">
+                                        <button type="submit" class="btn btn-sm btn-danger rounded-0 rounded-end" title="Hapus Data">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
                                     </form>
+
                                 </div>
                             </td>
                         </tr>
-                        <!-- Empty State -->
+
+                        <!-- Tampilan Jika Data Kosong -->
                         <tr th:if="${#lists.isEmpty(products)}">
                             <td colspan="6" class="text-center py-5 text-muted">
-                                <i class="fas fa-inbox fa-3x mb-3 opacity-25"></i>
-                                <p>Belum ada data produk.</p>
+                                <i class="fas fa-box-open fa-3x mb-3 opacity-25"></i>
+                                <p class="mb-1">Belum ada produk.</p>
+                                <a th:href="@{/products/create}" class="btn btn-sm btn-outline-primary mt-2">Tambah Data Baru</a>
                             </td>
                         </tr>
                     </tbody>
                 </table>
             </div>
         </div>
-        
     </div>
 </section>
+
+<!-- Script Kosong -->
+<script></script>
 </body>
 </html>

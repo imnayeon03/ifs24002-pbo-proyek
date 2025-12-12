@@ -2,232 +2,120 @@
 <html lang="id" xmlns:th="http://www.thymeleaf.org" 
       th:replace="~{layouts/base :: layout(~{::title}, ~{::section}, ~{::script})}">
 <head>
-    <title>Dashboard - Toko App</title>
+    <title>Beranda - Toko App</title>
 </head>
 <body>
 
-    <section class="py-4">
-        <style>
-            /* --- CSS KHUSUS DASHBOARD MODERN --- */
-            
-            /* Kartu Statistik dengan Gradient Estetik */
-            .modern-card {
-                border: none;
-                border-radius: 24px; /* Sudut sangat bulat */
-                overflow: hidden;
-                position: relative;
-                color: white;
-                box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-                transition: transform 0.3s ease, box-shadow 0.3s ease;
-                min-height: 200px;
-                display: flex;
-                flex-direction: column;
-                justify-content: space-between;
-            }
-
-            .modern-card:hover {
-                transform: translateY(-8px);
-                box-shadow: 0 20px 40px rgba(0,0,0,0.2);
-            }
-
-            /* Pilihan Warna Gradient Baru */
-            .grad-purple {
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            }
-            .grad-emerald {
-                background: linear-gradient(135deg, #0ba360 0%, #3cba92 100%);
-            }
-            .grad-orange {
-                background: linear-gradient(135deg, #ff9966 0%, #ff5e62 100%);
-            }
-
-            /* Dekorasi Lingkaran di Background Kartu */
-            .card-decoration {
-                position: absolute;
-                width: 150px;
-                height: 150px;
-                background: rgba(255, 255, 255, 0.2);
-                border-radius: 50%;
-                top: -30px;
-                right: -30px;
-                filter: blur(20px);
-            }
-
-            .stat-value { font-size: 3.5rem; font-weight: 700; line-height: 1; letter-spacing: -2px; }
-            .stat-label { font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; opacity: 0.8; font-weight: 600; }
-            
-            /* Action Cards (Menu Bawah) */
-            .action-card {
-                background: white;
-                border: none;
-                border-radius: 20px;
-                padding: 1.5rem;
-                transition: all 0.3s;
-                height: 100%;
-                display: flex;
-                align-items: center;
-                box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-                text-decoration: none;
-                color: #1f2937;
-            }
-            .action-card:hover {
-                transform: translateY(-5px);
-                box-shadow: 0 15px 30px rgba(0,0,0,0.08);
-                color: #4361ee; /* Warna Primary */
-            }
-            .icon-box {
-                width: 60px;
-                height: 60px;
-                border-radius: 16px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 1.5rem;
-                margin-right: 20px;
-                transition: all 0.3s;
-            }
-            /* Warna Icon Box */
-            .icon-blue { background: #e0e7ff; color: #4361ee; }
-            .icon-green { background: #d1fae5; color: #059669; }
-            .icon-purple { background: #ede9fe; color: #7c3aed; }
-
-            .action-card:hover .icon-box { transform: scale(1.1); }
-        </style>
-
-        <div class="container py-3">
-            
-            <!-- Welcome Header -->
-            <div class="row mb-5 align-items-end">
-                <div class="col-md-8">
-                    <p class="text-muted mb-1 fw-bold ls-1 text-uppercase small">Dashboard Overview</p>
-                    <h2 class="display-6 fw-bold text-dark">
-                        Selamat Datang, <span class="text-primary" th:text="${user != null ? user.name : 'Tamu'}">Edwin</span>! 👋
-                    </h2>
-                    <p class="text-muted">Berikut adalah ringkasan performa toko Anda hari ini.</p>
+    <section>
+        <!-- TAMPILAN JIKA BELUM LOGIN -->
+        <div th:if="${user == null}" class="p-5 mb-4 bg-light rounded-3 text-center shadow-sm border">
+            <div class="container-fluid py-5">
+                <h1 class="display-5 fw-bold text-primary">Selamat Datang di Toko App</h1>
+                <p class="col-md-8 fs-4 mx-auto text-muted">
+                    Aplikasi manajemen toko sederhana untuk mengelola Produk, Stok, dan memantau aset penjualan Anda dengan mudah.
+                </p>
+                <div class="mt-4">
+                    <a th:href="@{/auth/login}" class="btn btn-primary btn-lg px-4 me-md-2">Masuk Sekarang</a>
+                    <a th:href="@{/auth/register}" class="btn btn-outline-secondary btn-lg px-4">Daftar Akun</a>
                 </div>
-                <div class="col-md-4 text-md-end">
-                     <div class="d-inline-flex align-items-center bg-white px-4 py-2 rounded-pill shadow-sm">
-                        <i class="far fa-calendar-alt text-primary me-2"></i>
-                        <span class="fw-bold text-dark" th:text="${#temporals.format(#temporals.createNow(), 'EEEE, dd MMMM yyyy')}">Kamis, 11 Des 2025</span>
-                    </div>
+            </div>
+        </div>
+
+        <!-- TAMPILAN JIKA SUDAH LOGIN (DASHBOARD) -->
+        <div th:if="${user != null}">
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h2 class="fw-light">Halo, <span class="fw-bold" th:text="${user.name}">User</span>!</h2>
+                    <p class="text-muted">Berikut adalah ringkasan toko Anda hari ini.</p>
                 </div>
             </div>
 
-            <!-- Stats Grid -->
+            <!-- Kartu Statistik -->
             <div class="row g-4 mb-5">
-                
-                <!-- CARD 1: Total Produk (Ungu/Biru) -->
-                <div class="col-lg-4 col-md-6">
-                    <div class="card modern-card grad-purple p-4">
-                        <div class="card-decoration"></div>
-                        <div class="position-relative z-2">
-                            <div class="d-flex justify-content-between align-items-start">
+                <!-- Total Produk -->
+                <div class="col-md-4">
+                    <div class="card card-stat bg-primary text-white h-100 shadow">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
                                 <div>
-                                    <div class="stat-label mb-2">Total Produk</div>
-                                    <div class="stat-value" th:text="${totalProducts}">0</div>
+                                    <h6 class="card-title text-uppercase mb-2 opacity-75">Total Produk</h6>
+                                    <h2 class="display-4 fw-bold" th:text="${totalProducts}">0</h2>
                                 </div>
-                                <i class="fas fa-box-open fa-2x opacity-50"></i>
+                                <i class="fas fa-box-open fa-4x opacity-25"></i>
                             </div>
-                            <div class="mt-4">
-                                <a th:href="@{/products}" class="btn btn-light btn-sm rounded-pill fw-bold px-3 text-primary">
-                                    Lihat Inventory <i class="fas fa-arrow-right ms-1"></i>
+                            <p class="mt-3 mb-0 small">Item tersedia di gudang</p>
+                        </div>
+                        <div class="card-footer bg-transparent border-0">
+                            <a th:href="@{/products}" class="text-white text-decoration-none stretched-link">Lihat Detail &rarr;</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Total Kategori -->
+                <div class="col-md-4">
+                    <div class="card card-stat bg-success text-white h-100 shadow">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="card-title text-uppercase mb-2 opacity-75">Kategori Unik</h6>
+                                    <h2 class="display-4 fw-bold" th:text="${totalCategories}">0</h2>
+                                </div>
+                                <i class="fas fa-tags fa-4x opacity-25"></i>
+                            </div>
+                            <p class="mt-3 mb-0 small">Variasi jenis produk</p>
+                        </div>
+                        <div class="card-footer bg-transparent border-0">
+                            <a th:href="@{/products/chart}" class="text-white text-decoration-none stretched-link">Lihat Grafik &rarr;</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Nilai Aset -->
+                <div class="col-md-4">
+                    <div class="card card-stat bg-warning text-dark h-100 shadow">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="card-title text-uppercase mb-2 opacity-75">Estimasi Aset</h6>
+                                    <!-- Format Rupiah -->
+                                    <h3 class="fw-bold" th:text="'Rp ' + ${#numbers.formatDecimal(totalAssetValue, 0, 'COMMA', 0, 'POINT')}">Rp 0</h3>
+                                </div>
+                                <i class="fas fa-coins fa-4x opacity-25"></i>
+                            </div>
+                            <p class="mt-3 mb-0 small">Total nilai (Harga x Stok)</p>
+                        </div>
+                        <div class="card-footer bg-transparent border-0">
+                            <small>Data berdasarkan input stok terkini</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-header bg-white py-3">
+                            <h5 class="mb-0 fw-bold"><i class="fas fa-rocket me-2 text-primary"></i>Aksi Cepat</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-grid gap-2 d-md-block">
+                                <a th:href="@{/products/create}" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-plus me-1"></i> Tambah Produk Baru
+                                </a>
+                                <a th:href="@{/products}" class="btn btn-outline-dark btn-lg">
+                                    <i class="fas fa-list me-1"></i> Kelola Daftar Produk
                                 </a>
                             </div>
                         </div>
                     </div>
                 </div>
-
-                <!-- CARD 2: Kategori (Emerald) -->
-                <div class="col-lg-4 col-md-6">
-                    <div class="card modern-card grad-emerald p-4">
-                        <div class="card-decoration"></div>
-                        <div class="position-relative z-2">
-                            <div class="d-flex justify-content-between align-items-start">
-                                <div>
-                                    <div class="stat-label mb-2">Kategori</div>
-                                    <div class="stat-value" th:text="${totalCategories}">0</div>
-                                </div>
-                                <i class="fas fa-tags fa-2x opacity-50"></i>
-                            </div>
-                            <div class="mt-4">
-                                <a th:href="@{/products/chart}" class="btn btn-light btn-sm rounded-pill fw-bold px-3 text-success">
-                                    Lihat Grafik <i class="fas fa-chart-pie ms-1"></i>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- CARD 3: Estimasi Aset (Orange Sunset) -->
-                <div class="col-lg-4 col-md-12">
-                    <div class="card modern-card grad-orange p-4">
-                        <div class="card-decoration"></div>
-                        <div class="position-relative z-2">
-                            <div class="d-flex justify-content-between align-items-start">
-                                <div>
-                                    <div class="stat-label mb-2">Total Aset</div>
-                                    <div class="stat-value" style="font-size: 2.5rem;"
-                                         th:text="'Rp ' + ${#numbers.formatDecimal(totalAssetValue, 0, 'COMMA', 0, 'POINT')}">
-                                        Rp 14,000,000
-                                    </div>
-                                </div>
-                                <i class="fas fa-wallet fa-2x opacity-50"></i>
-                            </div>
-                            <div class="mt-4 text-white opacity-75 fw-bold small">
-                                <i class="fas fa-sync-alt fa-spin me-1"></i> Updated Real-time
-                            </div>
-                        </div>
-                    </div>
-                </div>
             </div>
-
-            <!-- Quick Actions Section -->
-            <div class="d-flex align-items-center mb-4">
-                <div class="bg-primary rounded-pill me-3" style="width: 5px; height: 30px;"></div>
-                <h4 class="fw-bold mb-0 text-dark">Aksi Cepat</h4>
-            </div>
-
-            <div class="row g-4">
-                <div class="col-md-4">
-                    <a th:href="@{/products/create}" class="action-card">
-                        <div class="icon-box icon-blue">
-                            <i class="fas fa-plus"></i>
-                        </div>
-                        <div>
-                            <h6 class="fw-bold mb-1 fs-5">Tambah Produk</h6>
-                            <small class="text-muted">Input stok barang masuk</small>
-                        </div>
-                    </a>
-                </div>
-                
-                <div class="col-md-4">
-                    <a th:href="@{/products}" class="action-card">
-                        <div class="icon-box icon-green">
-                            <i class="fas fa-boxes"></i>
-                        </div>
-                        <div>
-                            <h6 class="fw-bold mb-1 fs-5">Kelola Stok</h6>
-                            <small class="text-muted">Edit data atau hapus</small>
-                        </div>
-                    </a>
-                </div>
-
-                <div class="col-md-4">
-                    <a th:href="@{/products/chart}" class="action-card">
-                        <div class="icon-box icon-purple">
-                            <i class="fas fa-chart-bar"></i>
-                        </div>
-                        <div>
-                            <h6 class="fw-bold mb-1 fs-5">Analisis Data</h6>
-                            <small class="text-muted">Visualisasi grafik toko</small>
-                        </div>
-                    </a>
-                </div>
-            </div>
-
         </div>
     </section>
 
+    <!-- Script kosong jika tidak ada js khusus -->
     <script></script>
+
 </body>
 </html>
